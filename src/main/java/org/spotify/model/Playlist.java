@@ -1,7 +1,6 @@
 package org.spotify.model;
 
 import java.io.Serializable;
-import java.util.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -163,7 +162,7 @@ public class Playlist implements Serializable {
         return "id: " + id + " nombre: '" + name ;
     }
 
-    public String ToCSV(String delimiter) {
+    public String toCSV(String delimiter) {
         String songIds = getSongIdsAsString();
         return id + delimiter + name + delimiter + songIds ;
     }

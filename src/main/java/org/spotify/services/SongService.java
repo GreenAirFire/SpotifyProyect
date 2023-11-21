@@ -2,11 +2,10 @@ package org.spotify.services;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.spotify.exceptions.NotFoundException;
-import org.spotify.model.Customer;
+import org.spotify.model.customers.Customer;
 import org.spotify.model.Song;
 import org.spotify.model.Playlist;
 
