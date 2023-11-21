@@ -7,6 +7,8 @@ import org.spotify.exceptions.UnsupportedOperationException;
 import java.util.*;
 
 public class Premium extends Customer{
+
+    private List<Playlist> playlists;
     public Premium(String id,
                    String username,
                    String password,
@@ -15,6 +17,7 @@ public class Premium extends Customer{
                    int age,
                    String[] artistIds){
         super(id,username,password,name,lastname,age,artistIds);
+        this.playlists = new ArrayList<>();
     }
 
 

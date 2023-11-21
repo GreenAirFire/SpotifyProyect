@@ -22,7 +22,7 @@ public abstract class Customer implements Serializable {
     protected String lastname;
     protected int age;
     protected Set<UUID> artistIdsFollowedSet;
-    protected List<Playlist> playlists;
+
 
 
     public Customer(String id,
@@ -74,7 +74,7 @@ public abstract class Customer implements Serializable {
         this.lastname = lastname;
         this.age = age;
         this.artistIdsFollowedSet = new HashSet<>();
-        this.playlists = new ArrayList<>();
+
     }
     public Customer(UUID id,
                     String username,
@@ -97,7 +97,7 @@ public abstract class Customer implements Serializable {
         this.lastname = lastname;
         this.age = age;
         this.artistIdsFollowedSet = new HashSet<>();
-        this.playlists = new ArrayList<>();
+
     }
 
     public Customer(UUID id, String username,
@@ -113,7 +113,7 @@ public abstract class Customer implements Serializable {
         this.lastname = lastName;
         this.age = age;
         this.artistIdsFollowedSet = artistIdsFollowedSet;
-        this.playlists = new ArrayList<>();
+
     }
 
     public void addArtistIdFollowed(UUID artistId){
@@ -263,24 +263,17 @@ public abstract class Customer implements Serializable {
         return new HashSet<>(artistIdsFollowedSet);
     }
 
-    public boolean addPlaylists(List<Playlist> playlists){
-        return this.playlists.addAll(playlists);
-    }
-
-    public Optional<Playlist> getPlaylistById(UUID playlistId) {
-        return playlists.stream()
-                .filter(playlist -> playlist.getId().equals(playlistId))
-                .findFirst();
-    }
 
 
 
-    /**public void addPlaylist(String name,UUID id,List<UUID> songIdsList){
-        Playlist playlist = new Playlist(id, name,songIdsList);
-        this.playlists.add(playlist); //Add the playlist to the list
-    }**/
+
 
     //Abstract methods
+
+    public abstract boolean addPlaylists(List<Playlist> playlists);
+
+    public abstract Optional<Playlist> getPlaylistById(UUID playlistId);
+
     public abstract void addPlaylist(String namePlaylist)throws UnsupportedOperationException;
 
     public abstract List<Playlist> getPlaylists();
@@ -303,7 +296,7 @@ public abstract class Customer implements Serializable {
         Playlist playlist = new Playlist(name,id);
         this.playlists.add(playlist); //Add the playlist to the list
     }**/
-     public abstract void addPlaylistt(Playlist playlist);
+     public abstract void addPlaylist(Playlist playlist);
         //this.playlists.add(playlist);
 
     //Imprimir
