@@ -7,6 +7,7 @@ import org.spotify.exceptions.ExitMethodException;
 import org.spotify.exceptions.NotFoundException;
 import org.spotify.exceptions.UserNameAlreadyTakenException;
 import org.spotify.model.*;
+import org.spotify.model.customers.Customer;
 import org.spotify.services.ArtistService;
 import org.spotify.services.CustomerService;
 import org.spotify.services.FileService;
@@ -662,7 +663,7 @@ public class Main {
             //playlists.stream().forEach(playlist -> System.out.println(playlist));
 
             customerService.getAllPlaylists().stream()
-                    .forEach(playlist -> System.out.println(playlist.ToCSV(";")));
+                    .forEach(playlist -> System.out.println(playlist.toCSV(";")));
 
             System.out.println("Please enter the id of the playlist to add");
             String id = scanner.nextLine();
@@ -688,7 +689,7 @@ public class Main {
     //============CASE 17 - EDIT A PLAYLIST ===========
 
     private static void editPlaylist (Scanner scanner, CustomerService customerService)throws ExitMethodException{
-        try{
+
             System.out.println("Please enter the username");
             String username = scanner.nextLine();
             System.out.println("Please enter the id of the playlist to modificate");
@@ -696,13 +697,17 @@ public class Main {
             System.out.println("Please enter the correct name of the playlist");
             String namu = scanner.nextLine();
             String newName = namu;
-            boolean modificated = customerService.updatePlaylist(newName,username,idPl);
+        try{
 
-            if (modificated) {
-                System.out.println("Playlist actualizado con éxito");
-            } else {
+            boolean playlistWasUpdated = customerService.updatePlaylist(newName,username,idPl);
+
+            if (!playlistWasUpdated) {
                 System.out.println("El playlist con el ID especificado no existe");
+
             }
+            System.out.println("Playlist actualizado con éxito");
+
+
         } catch (IOException | NotFoundException | IllegalArgumentException e) {
             System.out.println("Error loading playlist due to error: " + e.getMessage());
 

@@ -1,51 +1,61 @@
-package org.spotify.model;
+package org.spotify.model.customers;
 
 import org.spotify.exceptions.MaxSongsInPlayList;
 import org.spotify.exceptions.NotFoundException;
-import org.spotify.exceptions.UnsupportedOperationException;
 
 import java.util.*;
+import org.spotify.model.Playlist;
 
-public class Premium extends Customer{
+public class PremiumCustomer extends Customer{
 
     private List<Playlist> playlists;
-    public Premium(String id,
-                   String username,
-                   String password,
-                   String name,
-                   String lastname,
-                   int age,
-                   String[] artistIds){
+    public PremiumCustomer(String id,
+                           String username,
+                           String password,
+                           String name,
+                           String lastname,
+                           int age,
+                           String[] artistIds){
         super(id,username,password,name,lastname,age,artistIds);
         this.playlists = new ArrayList<>();
     }
 
 
-    public Premium(String username,
-                   String password,
-                   String name,
-                   String lastname,
-                   int age){
+    public PremiumCustomer(String username,
+                           String password,
+                           String name,
+                           String lastname,
+                           int age){
         super(username,password,name,lastname,age);
+        this.playlists = new ArrayList<>();
     }
 
-    public Premium(UUID id,
-                   String username,
-                   String password,
-                   String name,
-                   String lastname,
-                   int age){
+    public PremiumCustomer(UUID id,
+                           String username,
+                           String password,
+                           String name,
+                           String lastname,
+                           int age){
         super(id,username,password,name,lastname,age);
+        this.playlists = new ArrayList<>();
     }
 
-    public Premium(UUID id,
-                   String username,
-                   String password,
-                   String name,
-                   String lastName,
-                   int age,
-                   Set<UUID> artistIdsFollowedSet){
+    public PremiumCustomer(UUID id,
+                           String username,
+                           String password,
+                           String name,
+                           String lastName,
+                           int age,
+                           Set<UUID> artistIdsFollowedSet){
         super(id,username,password,name,lastName,age,artistIdsFollowedSet);
+        this.playlists = new ArrayList<>();
+    }
+
+    @Override
+    public Optional<Playlist> getPlaylistById(UUID playlistId) {
+        return playlists.stream()
+                .filter(playlist -> playlist.getId().equals(playlistId))
+                .findFirst();
     }
 
     public void addPlaylist(String namePlaylist) {
@@ -53,7 +63,7 @@ public class Premium extends Customer{
         this.playlists.add(playlist); //Add the playlist to the list
     }
 
-    public List<Playlist> getPlaylists(){
+    public List<Playlist> getPlaylists() {
         return new ArrayList<>(playlists); // Return a copy of the playlist list to prevent external modification
     }
 
@@ -62,47 +72,79 @@ public class Premium extends Customer{
         this.playlists.addAll(playlists);
     }
 
-    public void addPlaylistt(Playlist playlist){
-    this.playlists.add(playlist);}
 
     public void removePlaylist(UUID playlistId){
         playlists.remove(getPlaylistById(playlistId));
     }
 
     public void addSongToPlaylist(UUID playlistId, UUID songId) throws MaxSongsInPlayList, NotFoundException {
-        Playlist playlist = getPlaylistById(playlistId).get();
-        if (playlist == null) {
+        Optional<Playlist> optionalPlaylist = getPlaylistById(playlistId);
+
+        if (optionalPlaylist.isEmpty()) {
             // La playlist no se encontró
             throw new NotFoundException("Playlist not found");
         }
+
+        Playlist playlist = optionalPlaylist.get();
         playlist.addSongId(songId);
 
     }
 
     public void removeSongFromPlaylist(UUID playlistId, UUID songId) throws NotFoundException {
-        Playlist playlist = getPlaylistById(playlistId).get();
-        if (playlist == null) {
+        Optional<Playlist> optionalPlaylist = getPlaylistById(playlistId);
+
+        if (optionalPlaylist.isEmpty()) {
             // La playlist no se encontró
             throw new NotFoundException("Playlist not found");
         }
 
-        if (playlist.getSongIdsList().remove(songId)) {
-            // Song was found and removed successfully
-        } else {
-            // If remove() returns false, the song was not found
+        Playlist playlist = optionalPlaylist.get();
+
+        if (!playlist.getSongIdsList().remove(songId)) {
             throw new NotFoundException("Song not found in the playlist");
         }
+
     }
 
 
     public List<UUID> getSongsFromPlaylist(UUID playlistId) throws NotFoundException {
-        Optional<Playlist> matchingPlaylist = getPlaylists().stream()
-                .filter(playlist -> playlist.getId().equals(playlistId))
-                .findFirst();
+        Optional<Playlist> optionalPlaylist = getPlaylistById(playlistId);
 
-        return matchingPlaylist
-                .map(Playlist::getSongIdsList)
-                .orElseThrow(() -> new NotFoundException("Invalid playlist ID for the Premium user."));
+        if (optionalPlaylist.isEmpty()) {
+            // La playlist no se encontró
+            throw new NotFoundException("Playlist not found");
+        }
+
+        Playlist playlist = optionalPlaylist.get();
+
+        return playlist.getSongIdsList();
+    }
+
+    @Override
+    public List<String> playlistToCSVLines(String delimiter) {
+        return playlists.stream()
+                .map(playlist -> playlist.toCSV(delimiter))
+                .toList();
+    }
+
+    @Override
+    public void addPlaylist(Playlist playlist) {
+        this.playlists.add(playlist);
+    }
+
+    @Override
+    public Optional<Playlist> updatePlaylist(String newName, UUID playlistId) {
+        Optional<Playlist> optionalPlaylist = getPlaylistById(playlistId);
+
+        if (optionalPlaylist.isEmpty()) {
+            // La playlist no se encontró
+            return Optional.empty();
+        }
+
+        Playlist playlist = optionalPlaylist.get();
+        playlist.setName(newName);
+
+        return Optional.of(playlist);
     }
 
     public String toCSV(String delimiter){

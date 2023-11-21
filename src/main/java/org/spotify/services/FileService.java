@@ -12,8 +12,9 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.spotify.exceptions.UnsupportedOperationException;
 import org.spotify.model.Artist;
-import org.spotify.model.Customer;
+import org.spotify.model.customers.Customer;
 import org.spotify.model.Playlist;
 import org.spotify.model.Song;
 import org.spotify.services.enums.*;
@@ -405,7 +406,7 @@ public class FileService {
     public List<Customer> readCustomersWithPlayListsFromCSV(
             String customersPath,
             String delimiter,
-            String playlistsPath) throws IOException {
+            String playlistsPath) throws IOException, UnsupportedOperationException {
 
         File customersFile = new File(customersPath);
         List<String> linesFromCustomers = Files.readAllLines(customersFile.toPath(), StandardCharsets.UTF_8);
@@ -429,7 +430,8 @@ public class FileService {
         return customers;
 
     }
-
+    /*If you want to use streams we need to do some tricks to sort the unsupportesOperation exception*/
+    /*
     public List<Customer> readCustomersWithPlayListsFromCSVUsingStreams(
             String customersPath,
             String delimiter,
@@ -446,8 +448,10 @@ public class FileService {
                         customer.addPlayLists(playlistsAdd);
                     }
                 })
-                .collect(Collectors.toList());
+                .toList();
     }
+    */
+
 
 
     public void saveArtistToBinaryFileUsingTheEntireList(String path, List<Artist> artists)throws IOException {

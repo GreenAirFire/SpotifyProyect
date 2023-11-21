@@ -7,6 +7,9 @@ import org.spotify.model.*;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
+import org.spotify.model.customers.Customer;
+import org.spotify.model.customers.PremiumCustomer;
+import org.spotify.model.customers.RegularCustomer;
 
 public class CustomerService {
     private List<Customer> customerList ;
@@ -142,13 +145,14 @@ public class CustomerService {
 
         Playlist playlistToAdd = optionalPlaylist.get();
 
-        if (customer instanceof Premium){
-            ((Premium) customer).addPlaylistt(playlistToAdd);
-        } else if (customer instanceof Regular){
-            ((Regular)customer).addPlaylistt(playlistToAdd);
+        //Use polymorphism to add playlist to customer, the instance of is not necessary,
+        // that is the idea of polymorphism
+        if (customer instanceof PremiumCustomer){
+            ((PremiumCustomer) customer).addPlaylist(playlistToAdd);
+        } else if (customer instanceof RegularCustomer){
+            ((RegularCustomer)customer).addPlaylist(playlistToAdd);
         }
 
-        customer.printPlaylist();
         return true;
     }
     public void loadCustomersToBinaryFileUsingTheEntireList(String path, FileService fileService) throws IOException, ClassNotFoundException{
@@ -213,9 +217,8 @@ public class CustomerService {
 
         if (!optionalCustomer.isPresent()) {
             System.out.println("Customer not found");
-            throw new NotFoundException("Error while detecting customer "+ " not found");
+            throw new NotFoundException("Error while detecting customer " + username + " not found");
         }
-
 
         // Validar el nuevo nombre del playlist
         if (newName == null || newName.isEmpty()) {
@@ -223,18 +226,12 @@ public class CustomerService {
         }
 
         Customer customer = optionalCustomer.get(); // Get the customer if it exists
-        System.out.println("Customer found: " + customer);
 
         UUID playlistId = UUID.fromString(idPl);
-        Optional<Playlist> optionalPlaylist = customer.getPlaylistById(playlistId);
-        if (!optionalPlaylist.isPresent()) {
-            throw new NotFoundException("El customer no tiene esa playlist");
-            // Now you have the found playlist and can work with it.
-        }
-        Playlist playlist = optionalPlaylist.get();
-        playlist.setName(newName);
-        customer.printPlaylist();
-        return true;
+
+        Optional<Playlist> optionalPlaylist = customer.updatePlaylist(newName, playlistId);
+
+        return optionalPlaylist.isPresent();
     }
 
 
@@ -319,7 +316,7 @@ public class CustomerService {
     public void savePlaylistToCSVFile(String filePath, FileService fileService)throws IOException{
         List<String> playlistsListToCSV = this.customerList.stream()
                 .flatMap(customer -> customer.getPlaylists().stream())
-                .map(playlist -> playlist.ToCSV(";"))
+                .map(playlist -> playlist.toCSV(";"))
                 .toList();
         fileService.writeTextFile(filePath, playlistsListToCSV);
     }
@@ -330,13 +327,13 @@ public class CustomerService {
         if ("regular".equalsIgnoreCase(customerType)) {
             // Filtrar solo clientes regulares
             filteredCustomers = customerList.stream()
-                    .filter(c -> c instanceof Regular)
+                    .filter(c -> c instanceof RegularCustomer)
                     .sorted(Comparator.comparing(Customer::getUsername))
                     .collect(Collectors.toList());
         } else if ("premium".equalsIgnoreCase(customerType)) {
             // Filtrar solo clientes premium
             filteredCustomers = customerList.stream()
-                    .filter(c -> c instanceof Premium)
+                    .filter(c -> c instanceof PremiumCustomer)
                     .sorted(Comparator.comparing(Customer::getUsername))
                     .collect(Collectors.toList());
         } else {

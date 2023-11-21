@@ -1,4 +1,4 @@
-package org.spotify.model;
+package org.spotify.model.customers;
 
 import java.io.Serializable;
 import java.util.*;
@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import org.spotify.exceptions.MaxSongsInPlayList;
 import org.spotify.exceptions.NotFoundException;
 import org.spotify.exceptions.UnsupportedOperationException;
+import org.spotify.model.Playlist;
 import org.spotify.services.enums.CustomerTypesEnum;
 
 public abstract class Customer implements Serializable {
@@ -252,8 +253,8 @@ public abstract class Customer implements Serializable {
                                                String[] artistIds
                                                ){
         return switch (customerType){
-            case PREMIUM -> new Premium(id, username, password, name, lastname, age, artistIds);
-            case REGULAR -> new Regular(id, username, password, name, lastname, age, artistIds);
+            case PREMIUM -> new PremiumCustomer(id, username, password, name, lastname, age, artistIds);
+            case REGULAR -> new RegularCustomer(id, username, password, name, lastname, age, artistIds);
         };
     }
 
@@ -263,52 +264,62 @@ public abstract class Customer implements Serializable {
         return new HashSet<>(artistIdsFollowedSet);
     }
 
-
-
-
-
-
     //Abstract methods
 
-    public abstract boolean addPlaylists(List<Playlist> playlists);
 
     public abstract Optional<Playlist> getPlaylistById(UUID playlistId);
 
-    public abstract void addPlaylist(String namePlaylist)throws UnsupportedOperationException;
+    public abstract void addPlaylist(String namePlaylist) throws UnsupportedOperationException;
 
     public abstract List<Playlist> getPlaylists();
 
-    public abstract void addPlayLists(List<Playlist> playlists);
+    public abstract void addPlayLists(List<Playlist> playlists) throws UnsupportedOperationException;
     //return this.playlists.addAll(playlists);
 
     public abstract void removePlaylist(UUID playlistId);
 
     public abstract void addSongToPlaylist(UUID playlistId, UUID songId) throws MaxSongsInPlayList, NotFoundException;
 
-    public abstract void removeSongFromPlaylist(UUID playlistId, UUID songId)throws NotFoundException;
+    public abstract void removeSongFromPlaylist(UUID playlistId, UUID songId)
+        throws NotFoundException, MaxSongsInPlayList;
 
-    public abstract List<UUID> getSongsFromPlaylist(UUID playlistId)throws NotFoundException;
+    public abstract List<UUID> getSongsFromPlaylist(UUID playlistId) throws NotFoundException;
 
-    //return new ArrayList<>(playlists); // Return a copy of the playlist list to prevent external modification
+    /*This method is not necessary. You have the toCSV method inside the Playlist class*/
+    /*public List<String> playlistToCSVLines(String delimiter) {
+        return playlists.stream()
+            .map(playlist -> {
+                String playlistId = playlist.getId().toString();
+                String playlistName = playlist.getName();
+                String userId = id.toString();
+                String songIds = playlist.getSongIdsList().stream()
+                    .map(UUID::toString)
+                    .collect(Collectors.joining(","));
 
+                return playlistId + delimiter + playlistName + delimiter + userId  + delimiter + "{" + songIds + "}";
+            })
+            .collect(Collectors.toList());
 
-    /**public void addPlaylist(String name, String id){
-        Playlist playlist = new Playlist(name,id);
-        this.playlists.add(playlist); //Add the playlist to the list
-    }**/
-     public abstract void addPlaylist(Playlist playlist);
-        //this.playlists.add(playlist);
+    }*/
+
+    public abstract List<String> playlistToCSVLines(String delimiter);
+
+    public abstract void addPlaylist(Playlist playlist);
+
+    public abstract Optional<Playlist> updatePlaylist(String newName, UUID playlistId);
 
     //Imprimir
     public void printArtistIdsFollowedSet() {
         artistIdsFollowedSet.forEach(artistId -> System.out.println("Artist ID: " + artistId));
     }
 
-    public  void printPlaylist(){
+    /*This shouldn't be here*/
+    /*
+    public void printPlaylist(){
         playlists.forEach(playlist -> System.out.println("Playlist: "+playlist));
-    }
+    }*/
 
-    //Sobreescribir
+
     @Override
     public String toString() {
         return "Customer{" +
@@ -335,22 +346,6 @@ public abstract class Customer implements Serializable {
             lastname + delimiter +
             age + delimiter +
             artistIds ;
-    }
-
-    public List<String> playlistToCSVLines(String delimiter) {
-        return playlists.stream()
-                .map(playlist -> {
-                    String playlistId = playlist.getId().toString();
-                    String playlistName = playlist.getName();
-                    String userId = id.toString();
-                    String songIds = playlist.getSongIdsList().stream()
-                            .map(UUID::toString)
-                            .collect(Collectors.joining(","));
-
-                    return playlistId + delimiter + playlistName + delimiter + userId  + delimiter + "{" + songIds + "}";
-                })
-                .collect(Collectors.toList());
-
     }
 
 
@@ -406,4 +401,6 @@ public abstract class Customer implements Serializable {
         validateAge(age);
         this.age = age;
     }
+
+
 }
