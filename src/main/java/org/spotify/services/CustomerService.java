@@ -1,6 +1,7 @@
 package org.spotify.services;
 
 import org.spotify.exceptions.NotFoundException;
+import org.spotify.exceptions.UnsupportedOperationException;
 import org.spotify.exceptions.UserNameAlreadyTakenException;
 import org.spotify.model.*;
 
@@ -42,6 +43,18 @@ public class CustomerService {
 
         List<Customer> customers = fileService.readCustomersFromCSV(path,delimiter);
 
+
+        return customerList.addAll(customers);
+    }
+
+    public boolean loadCustomerWithPlaylistsFromCSVFile(String customersPath,
+                                           String playlistsPath,
+                                           String delimiter,
+                                           FileService fileService)
+        throws IOException, NotFoundException, UnsupportedOperationException {
+
+        List<Customer> customers =
+            fileService.readCustomersWithPlayListsFromCSV(customersPath,delimiter,playlistsPath);
 
         return customerList.addAll(customers);
     }
